@@ -12,11 +12,19 @@ VOWELS = [ "AA", "AA0", "AA1", "AA2", "AE", "AE0", "AE1", "AE2", "AH",
 CONSONANTS = ["B", "CH", "D", "DH","F", "G", "HH","JH", "K", "L", "M", "N",
 "NG","P", "R", "S", "SH", "T", "TH","V", "W", "Y", "Z", "ZH", ]
 
+
+def good_line(line):
+  return (
+    not line.startswith(";;;")
+    and line.split("  ")[0].isalpha()
+  )
+
+
 def main():
     with open("cmudict-0.7b", encoding="ISO-8859-1") as f:
         counter = 0
         for line in f:
-            if not line.startswith(";;;"):
+            if good_line(line):
                 word, pronunciation = line.split("  ")
                 pronunciation = pronunciation.strip()
 
@@ -40,7 +48,8 @@ def main():
                 if states == ["vowel", "consonant", "vowel",]:
                     continue
 
-                print(f"{word} ({pronunciation}): {states}")
+                # print(f"{word} ({pronunciation}): {states}")
+                print(word.capitalize())
 
 
 if __name__ == "__main__":
