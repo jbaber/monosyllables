@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+#content {
+  font-size: 18vw;
+}
+.front {
+  color: black;
+  animation: fadeFront 5s forwards;
+}
+.vowel {
+  color: black;
+  animation: fadeVowel 5s forwards;
+  animation-delay: 1s;
+}
+.back {
+  color: black;
+  animation: fadeBack 5s forwards;
+  animation-delay: 2s;
+}
+@keyframes fadeFront {
+  to {
+    color: red;
+  }
+}
+@keyframes fadeVowel {
+  to {
+    color: green;
+  }
+}
+@keyframes fadeBack {
+  to {
+    color: blue;
+  }
+}
+</style>
+</head>
+<body>
+<span id="content"></span>
+
+<script>
+// "Universally recognized" clusters from John Algeo (1978) What Consonant
+// Clusters Are Possible, Word, 29:3, 206-224,
+// DOI: 10.1080/00437956.1978.11435661
+let ONSET_CLUSTERS = ["bl", "br", "dr", "dw", "fl", "fr", "gl", "gr", "kl",
+"kr", "kw", "pl", "pr", "sk", "skr", "skw", "sl", "sm", "sn", "sp", "spl",
+"spr", "st", "str", "sw", "shr", "tr", "sw", "thr", "thw"];
+let CODA_CLUSTERS = ["dz", "ft", "ks", "lb", "lch", "ld", "lf", "lk", "lp", "lt",
+"nch", "nd", "nt", "nz", "ps", "pt", "sk", "sp", "st", "kt", "lm", "lv", "mp",
+"nj", "nk"];
+
+// Extras from the same paper
+ONSET_CLUSTERS = ONSET_CLUSTERS.concat(["bw", "dy", "fy", "gw", "gy",
+"ky", "mw", "my", "nw", "ny", "pf", "py", "sf", "shl", "shm", "shn", "shp",
+"sht", "shw", "skl", "sky", "smy", "spy", "sw", "vl", "vr", "vy", "zh"]);
+
+CODA_CLUSTERS = CODA_CLUSTERS.concat(["rb", "rch", "rd", "rf", "rg",
+"rj", "rk", "rl", "rm", "rn", "rp", "rs", "rsh", "rsht", "rt", "rth", "rv",
+"nsk", "nf", "nsh", "pf", "rnst", "rpst", "rzh", "rsk"]);
+
+const ONSET_SINGLETONS = ["b", "d", "f", "g", "h", "j", "k", "l", "m", "n", "p", "r",
+"s", "t", "v", "w", "y", "z"];
+const CODA_SINGLETONS = ["b", "d", "f", "g", "j", "k", "l", "m", "n", "p", "r", "s",
+"t", "v", "z"];
+
+// Incomplete
+const VOWELS = ["a", "e", "i", "o", "u", "ay", "ee", "eye", "oh", "oo", "oi"];
+
+const FRONTS = ONSET_SINGLETONS.concat(ONSET_CLUSTERS).concat([""]);
+const BACKS =  CODA_SINGLETONS.concat(CODA_CLUSTERS).concat([""]);
+
+function random_triple() {
+  return {
+    "front": FRONTS[Math.floor(Math.random() * FRONTS.length)],
+    "vowel": VOWELS[Math.floor(Math.random() * VOWELS.length)],
+    "back": BACKS[Math.floor(Math.random() * BACKS.length)]
+  };
+}
+
+function html_from_triple(triple) {
+  let to_return = document.createElement("span");
+  let front = document.createElement("span");
+  let vowel = document.createElement("span");
+  let back = document.createElement("span");
+
+  front.classList.add("front");
+  vowel.classList.add("vowel");
+  back.classList.add("back");
+
+  front.innerText = triple["front"];
+  vowel.innerText = triple["vowel"];
+  back.innerText = triple["back"];
+
+  to_return.append(front);
+  to_return.append(vowel);
+  to_return.append(back);
+
+  return to_return;
+}
+
+
+function update() {
+  const triple = random_triple();
+  const content = document.querySelector("#content");
+  content.replaceChildren();
+  content.append(html_from_triple(triple));
+}
+
+update();
+
+window.addEventListener("click", update);
+</script>
+</body>
+</html>
