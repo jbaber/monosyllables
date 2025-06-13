@@ -64,16 +64,54 @@ const ONSET_SINGLETONS = ["b", "d", "f", "g", "h", "j", "k", "l", "m", "n", "p",
 const CODA_SINGLETONS = ["b", "d", "f", "g", "j", "k", "l", "m", "n", "p", "r", "s",
 "t", "v", "z"];
 
-// Incomplete
-const VOWELS = ["a", "e", "i", "o", "u", "ay", "ee", "eye", "oh", "oo", "oi"];
+/* Internet thinks there are 20 vowel sounds in English give or take --
+ * choosing the ones I personally distinguish */
+const VOWELS = {
+
+    /* Short */
+    "/i/": ["ee", "ea"], // as in "beet"
+    "/ɪ/": ["i"], // as in "bit"
+    "/ɛ/": ["e", "eh"], // as in "bet"
+    "/æ/": ["a"], // as in "bat"
+    "/a/": ["aw", "ough"], // as in "bought"
+    "/ʌ/": ["u", "uh"], // as in "but"
+    "/ʊ/": ["eu", "e"], // as in "book"
+    "/ɑ/": ["ah", "aw"], // as in "barn"
+    "/ɔ/": ["oh", "o"], // as in "bore"
+    "/oʊ/": ["oa", "oh"], // as in "boat"
+    "/u/": ["oo", "ooh"], // as in "boot"
+
+    /* Dipthongs */
+    "/eɪ/": ["ay", "ai"], // as in "bake"
+    "/aɪ/": ["eye", "i"], // as in "bike"
+    "/ɔɪ/": ["oy", "oi"], // as in "boy"
+    "/aʊ/": ["ow", "ou"], // as in "bout"
+    "/oʊ/": ["owe", "o", "oh"], // as in "bone"
+    "/ju/": ["ew", "you"], // as in "cute"
+
+    /* "R controlled" */
+    "/ɝ/": ["er", "ir"] // as in "bird"
+}
+const VOWEL_KEYS = Object.keys(VOWELS);
 
 const FRONTS = ONSET_SINGLETONS.concat(ONSET_CLUSTERS).concat([""]);
 const BACKS =  CODA_SINGLETONS.concat(CODA_CLUSTERS).concat([""]);
 
+function v_representation(vowel_key, index) {
+  let choices = VOWELS[vowel_key];
+
+  let chosen_index = index;
+  if (index == undefined) {
+    chosen_index = Math.floor(Math.random() * choices.length);
+  }
+
+  return choices[chosen_index];
+}
+
 function random_triple() {
   return {
     "front": FRONTS[Math.floor(Math.random() * FRONTS.length)],
-    "vowel": VOWELS[Math.floor(Math.random() * VOWELS.length)],
+    "vowel": v_representation(VOWEL_KEYS[Math.floor(Math.random() * VOWEL_KEYS.length)]),
     "back": BACKS[Math.floor(Math.random() * BACKS.length)]
   };
 }
