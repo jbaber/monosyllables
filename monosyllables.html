@@ -4,7 +4,7 @@
 <style>
 #content {
   font-size: 18vw;
-  position: absolute;
+  position: fixed;
   top: 50%;
   left: 50%;
   transform: translateX(-50%) translateY(-50%);
@@ -147,11 +147,118 @@ function update() {
   const content = document.querySelector("#content");
   content.replaceChildren();
   content.append(html_from_triple(triple));
+  content.style.top = "50%";
+  content.style.left = "50%";
+  let computed_style = window.getComputedStyle(content);
+  content_loc = {
+    "x": Number(computed_style.left.slice(0, -2)),
+    "y": Number(computed_style.top.slice(0, -2))
+  };
 }
 
-update();
 
-window.addEventListener("click", update);
+/* Just use mouse events for drag and map touch events to them.  If I ever want
+ * two-finger touch events, use ctrl-click or something and map to that.  The
+ * only thing that would be left out would be pinch-and spread. */
+function touch2Mouse(e) {
+  let theTouch = e.changedTouches[0];
+  let mouseEv;
+
+  switch(e.type) {
+    case "touchstart": mouseEv="mousedown"; break;  
+    case "touchend":   mouseEv="mouseup"; break;
+    case "touchmove":  mouseEv="mousemove"; break;
+    default: return;
+  }
+
+  let mouseEvent = new MouseEvent(mouseEv, {
+    "screenX": theTouch.screenX,
+    "screenY": theTouch.screenY,
+    "clientX": theTouch.clientX,
+    "clientY": theTouch.clientY,
+    "ctrlKey": false,
+    "altKey": false,
+    "shiftKey": false,
+    "metaKey": false,
+    "button": 0,
+    "relatedTarget": null
+  });
+
+  theTouch.target.dispatchEvent(mouseEvent);
+
+  e.preventDefault();
+}
+
+
+const VERT_THRESHOLD = 100;
+const HORZ_THRESHOLD = 100;
+
+let content_loc = {"x": undefined, "y": undefined};
+let mousedown_loc = {"x": undefined, "y": undefined};
+let mouseup_loc = {"x": undefined, "y": undefined};
+
+function reset_locs() {
+  mousedown_loc = {"x": undefined, "y": undefined};
+  mouseup_loc = {"x": undefined, "y": undefined};
+}
+
+function mousedown(e) {
+  mousedown_loc["x"] = e.clientX;
+  mousedown_loc["y"] = e.clientY;
+}
+
+
+function mousemove(e) {
+  mouseup(e);
+}
+
+function mouseup(e) {
+  mouseup_loc["x"] = e.clientX;
+  mouseup_loc["y"] = e.clientY;
+  let delta_x = mouseup_loc["x"] - mousedown_loc["x"];
+  let delta_y = mouseup_loc["y"] - mousedown_loc["y"];
+
+  if (delta_x > 0 && delta_x > HORZ_THRESHOLD) {
+    console.log("Swiped right");
+    content_loc.x += delta_x;
+    document.querySelector("#content").style.left = content_loc.x + "px";
+  }
+  else if (delta_x < 0 && -delta_x > HORZ_THRESHOLD) {
+    console.log("Swiped left");
+    content_loc.x += delta_x;
+    document.querySelector("#content").style.left = content_loc.x + "px";
+  }
+
+  else if (delta_y > 0 && delta_y > VERT_THRESHOLD) {
+    content_loc.y += delta_y;
+    document.querySelector("#content").style.top = content_loc.y + "px";
+    console.log("Swiped down");
+  }
+  else if (delta_y < 0 && -delta_y > VERT_THRESHOLD) {
+    content_loc.y += delta_y;
+    document.querySelector("#content").style.top = content_loc.y + "px";
+    console.log("Swiped up");
+  }
+
+  else {
+    update();
+  }
+
+  reset_locs();
+}
+
+
+function startup() {
+  update();
+  document.addEventListener("touchstart", touch2Mouse, true);
+  document.addEventListener("touchmove", touch2Mouse, true);
+  document.addEventListener("touchend", touch2Mouse, true);
+  document.addEventListener("mousemove", mousemove, true);
+  document.addEventListener("mousedown", mousedown, true);
+  document.addEventListener("mouseup", mouseup, true);
+}
+
+document.addEventListener("DOMContentLoaded", startup);
 </script>
 </body>
 </html>
