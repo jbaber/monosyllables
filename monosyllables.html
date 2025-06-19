@@ -150,10 +150,8 @@ function update() {
   content.style.top = "50%";
   content.style.left = "50%";
   let computed_style = window.getComputedStyle(content);
-  content_loc = {
-    "x": Number(computed_style.left.slice(0, -2)),
-    "y": Number(computed_style.top.slice(0, -2))
-  };
+  last_x = Number(computed_style.left.slice(0, -2));
+  last_y = Number(computed_style.top.slice(0, -2));
 }
 
 
@@ -192,59 +190,83 @@ function touch2Mouse(e) {
 
 const VERT_THRESHOLD = 100;
 const HORZ_THRESHOLD = 100;
+const TICK_THRESHOLD = 50;
 
-let content_loc = {"x": undefined, "y": undefined};
-let mousedown_loc = {"x": undefined, "y": undefined};
-let mouseup_loc = {"x": undefined, "y": undefined};
-
-function reset_locs() {
-  mousedown_loc = {"x": undefined, "y": undefined};
-  mouseup_loc = {"x": undefined, "y": undefined};
-}
+let last_x = undefined;
+let last_y = undefined;
+let last_tick = (new Date).getTime();
+let mouse_depressed = false;
+let x_path_len = 0;
+let y_path_len = 0;
 
 function mousedown(e) {
-  mousedown_loc["x"] = e.clientX;
-  mousedown_loc["y"] = e.clientY;
+  last_x = e.clientX;
+  last_y = e.clientY;
+  x_path_len = 0;
+  y_path_len = 0;
+  last_tick = (new Date).getTime();
+  mouse_depressed = true;
 }
 
-
-function mousemove(e) {
-  mouseup(e);
-}
 
 function mouseup(e) {
-  mouseup_loc["x"] = e.clientX;
-  mouseup_loc["y"] = e.clientY;
-  let delta_x = mouseup_loc["x"] - mousedown_loc["x"];
-  let delta_y = mouseup_loc["y"] - mousedown_loc["y"];
 
-  if (delta_x > 0 && delta_x > HORZ_THRESHOLD) {
-    console.log("Swiped right");
-    content_loc.x += delta_x;
-    document.querySelector("#content").style.left = content_loc.x + "px";
-  }
-  else if (delta_x < 0 && -delta_x > HORZ_THRESHOLD) {
-    console.log("Swiped left");
-    content_loc.x += delta_x;
-    document.querySelector("#content").style.left = content_loc.x + "px";
-  }
-
-  else if (delta_y > 0 && delta_y > VERT_THRESHOLD) {
-    content_loc.y += delta_y;
-    document.querySelector("#content").style.top = content_loc.y + "px";
-    console.log("Swiped down");
-  }
-  else if (delta_y < 0 && -delta_y > VERT_THRESHOLD) {
-    content_loc.y += delta_y;
-    document.querySelector("#content").style.top = content_loc.y + "px";
-    console.log("Swiped up");
-  }
-
-  else {
+  /* If you haven't moved much, it's a touch */
+  cur_x = e.clientX;
+  cur_y = e.clientY;
+  let delta_x = cur_x - last_x;
+  let delta_y = cur_y - last_y;
+  if (delta_x < HORZ_THRESHOLD && delta_y < VERT_THRESHOLD) {
     update();
   }
 
-  reset_locs();
+  x_path_len = 0;
+  y_path_len = 0;
+
+  mouse_depressed = false;
+}
+
+function mousemove(e) {
+  if (!mouse_depressed) {
+    return;
+  }
+
+  cur_x = e.clientX;
+  cur_y = e.clientY;
+  cur_tick = (new Date).getTime();
+  let delta_x = cur_x - last_x;
+  let delta_y = cur_y - last_y;
+  let delta_tick = cur_tick - last_tick;
+
+  if (delta_tick > TICK_THRESHOLD) {
+    if (delta_x > 0 && delta_x > HORZ_THRESHOLD) {
+      console.log("Swiped right");
+      last_x = cur_x;
+      last_y = cur_y;
+      last_tick = (new Date).getTime();
+      update();
+    }
+    else if (delta_x < 0 && -delta_x > HORZ_THRESHOLD) {
+      console.log("Swiped left");
+      last_x = cur_x;
+      last_y = cur_y;
+      last_tick = (new Date).getTime();
+      update();
+    }
+
+    else if (delta_y > 0 && delta_y > VERT_THRESHOLD) {
+      last_x = cur_x;
+      last_y = cur_y;
+      last_tick = (new Date).getTime();
+      console.log("Swiped down");
+    }
+    else if (delta_y < 0 && -delta_y > VERT_THRESHOLD) {
+      last_x = cur_x;
+      last_y = cur_y;
+      last_tick = (new Date).getTime();
+      console.log("Swiped up");
+    }
+  }
 }
 
 
