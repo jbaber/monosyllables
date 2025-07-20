@@ -188,43 +188,27 @@ function touch2Mouse(e) {
 }
 
 
-const VERT_THRESHOLD = 100;
-const HORZ_THRESHOLD = 100;
-const TICK_THRESHOLD = 50;
+function x_zone(delta_x) {
+  if (delta_x < 100) {
+    return 0;
+  }
+  if (delta_x < 200) {
+    return 1;
+  }
+  for }
 
-let last_x = undefined;
-let last_y = undefined;
-let last_tick = (new Date).getTime();
+
+let first_x = undefined;
+let first_y = undefined;
 let mouse_depressed = false;
-let x_path_len = 0;
-let y_path_len = 0;
+
 
 function mousedown(e) {
-  last_x = e.clientX;
-  last_y = e.clientY;
-  x_path_len = 0;
-  y_path_len = 0;
-  last_tick = (new Date).getTime();
+  first_x = e.clientX;
+  first_y = e.clientY;
   mouse_depressed = true;
 }
 
-
-function mouseup(e) {
-
-  /* If you haven't moved much, it's a touch */
-  cur_x = e.clientX;
-  cur_y = e.clientY;
-  let delta_x = cur_x - last_x;
-  let delta_y = cur_y - last_y;
-  if (delta_x < HORZ_THRESHOLD && delta_y < VERT_THRESHOLD) {
-    update();
-  }
-
-  x_path_len = 0;
-  y_path_len = 0;
-
-  mouse_depressed = false;
-}
 
 function mousemove(e) {
   if (!mouse_depressed) {
@@ -233,42 +217,59 @@ function mousemove(e) {
 
   cur_x = e.clientX;
   cur_y = e.clientY;
-  cur_tick = (new Date).getTime();
-  let delta_x = cur_x - last_x;
-  let delta_y = cur_y - last_y;
-  let delta_tick = cur_tick - last_tick;
+  let delta_x = cur_x - first_x;
+  let delta_y = cur_y - first_y;
 
-  if (delta_tick > TICK_THRESHOLD) {
-    if (delta_x > 0 && delta_x > HORZ_THRESHOLD) {
+  if (100 < delta_x && delta_x < 400) {
+  }
+
+    if (delta_x > 0 && delta_x > FIRST_HORZ_THRESH) {
       console.log("Swiped right");
       last_x = cur_x;
       last_y = cur_y;
-      last_tick = (new Date).getTime();
       update();
+      num_updates += 1;
     }
-    else if (delta_x < 0 && -delta_x > HORZ_THRESHOLD) {
+    else if (delta_x < 0 && -delta_x > FIRST_HORZ_THRESH) {
       console.log("Swiped left");
       last_x = cur_x;
       last_y = cur_y;
-      last_tick = (new Date).getTime();
       update();
+      num_updates += 1;
     }
 
-    else if (delta_y > 0 && delta_y > VERT_THRESHOLD) {
+    else if (delta_y > 0 && delta_y > FIRST_VERT_THRESH) {
       last_x = cur_x;
       last_y = cur_y;
-      last_tick = (new Date).getTime();
       console.log("Swiped down");
     }
-    else if (delta_y < 0 && -delta_y > VERT_THRESHOLD) {
+    else if (delta_y < 0 && -delta_y > FIRST_VERT_THRESH) {
       last_x = cur_x;
       last_y = cur_y;
-      last_tick = (new Date).getTime();
       console.log("Swiped up");
     }
   }
 }
 
+
+
+function mouseup(e) {
+
+  /* If you haven't moved much, it's a touch */
+  const cur_x = e.clientX;
+  const cur_y = e.clientY;
+  const delta_x = cur_x - last_x;
+  const delta_y = cur_y - last_y;
+  if (delta_x < FIRST_HORZ_THRESH && delta_y < FIRST_VERT_THRESH) {
+    update();
+  }
+
+  x_path_len = 0;
+  y_path_len = 0;
+  num_updates = 0;
+
+  mouse_depressed = false;
+}
 
 function startup() {
   update();
